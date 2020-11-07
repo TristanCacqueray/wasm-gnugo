@@ -119,6 +119,11 @@ SGFNode *readsgffilefuseki(const char *filename, int moves_per_game);
 /* Write SGF tree to a file. */
 int writesgf(SGFNode *root, const char *filename);
 
+/* In memory functions for wasm api */
+void setsgffile(char *content);
+void putc_prime(int c, FILE *stream);
+void set_in_memory_content(void);
+char *get_sgf_content(void);
 
 /* ---------------------------------------------------------------- */
 /* ---                          SGFTree                         --- */

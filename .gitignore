@@ -16,3 +16,5 @@ config.h
 stamp-h
 stamp-h1
 autom4te.cache
+
+build

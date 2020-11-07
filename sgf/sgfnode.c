@@ -886,13 +886,27 @@ sgf_write_header(SGFNode *root, int overwrite, int seed, float komi,
 static void parse_error(const char *msg, int arg);
 static void nexttoken(void);
 static void match(int expected);
-
+static char sgf_getch(void);
 
 static FILE *sgffile;
+static char *sgfcontent;
+static int sgfcontentpos;
 
+void setsgffile(char *content) {
+  sgfcontent = content;
+  sgfcontentpos = 0;
+}
 
-#define sgf_getch() (getc(sgffile))
-
+char sgf_getch() {
+  if (sgfcontent) {
+    char c = sgfcontent[sgfcontentpos++];
+    if (c == NULL) {
+      return EOF;
+    }
+    return c;
+  }
+  return getc(sgffile);
+}
 
 static char *sgferr;
 #ifdef TEST_SGFPARSER
@@ -1243,7 +1257,27 @@ readsgffile(const char *filename)
 /* ================================================================ */
 /*                          Write SGF tree                          */
 /* ================================================================ */
+static char sgf_output_content[4096];
+static int sgf_output_content_pos;
+static char in_memory_content;
 
+void set_in_memory_content(void) {
+  in_memory_content = 1;
+  sgf_output_content_pos = 0;
+  memset(sgf_output_content, 0, sizeof(sgf_output_content));
+}
+
+char *get_sgf_content(void) {
+  return sgf_output_content;
+}
+
+void putc_prime(int c, FILE *stream) {
+  if (in_memory_content == 1) {
+    sgf_output_content[sgf_output_content_pos++] = c;
+  } else {
+    fputc(c, stream);
+  }
+}
 
 #define OPTION_STRICT_FF4 0
 
@@ -1255,7 +1289,7 @@ sgf_putc(int c, FILE *file)
   if (c == '\n' && sgf_column == 0)
     return;
 
-  fputc(c, file);
+  putc_prime(c, file);
 
   if (c == '\n')
     sgf_column = 0;
@@ -1263,7 +1297,7 @@ sgf_putc(int c, FILE *file)
     sgf_column++;
 
   if (c == ']' && sgf_column > 60) {
-    fputc('\n', file);
+    putc_prime('\n', file);
     sgf_column = 0;
   }
 }
@@ -1273,10 +1307,10 @@ sgf_puts(const char *s, FILE *file)
 {
   for (; *s; s++) {
     if (*s == '[' || *s == ']' || *s == '\\') {
-      fputc('\\', file);
+      putc_prime('\\', file);
       sgf_column++;
     }
-    fputc((int) *s, file);
+    putc_prime((int) *s, file);
     sgf_column++;
   }
 }
@@ -1502,7 +1536,7 @@ writesgf(SGFNode *root, const char *filename)
 {
   FILE *outfile;
 
-  if (strcmp(filename, "-") == 0) 
+  if (strcmp(filename, "-") == 0 || strcmp(filename, "*") == 0)
     outfile = stdout;
   else
     outfile = fopen(filename, "w");
