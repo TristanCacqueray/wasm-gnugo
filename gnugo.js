@@ -16,7 +16,7 @@
 // after the generated code, you will need to define   var Module = {};
 // before the code. Then that object will be used in the code, and you
 // can continue to use Module afterwards as well.
-var Module = typeof Module !== 'undefined' ? Module : {};
+exports.init =  function(Module) {
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
@@ -1623,12 +1623,12 @@ function copyTempDouble(ptr) {
       abort('Assertion failed: ' + UTF8ToString(condition) + ', at: ' + [filename ? UTF8ToString(filename) : 'unknown filename', line, func ? UTF8ToString(func) : 'unknown function']);
     }
 
-  
+
   var ENV={};function ___buildEnvironment(environ) {
       // WARNING: Arbitrary limit!
       var MAX_ENV_VALUES = 64;
       var TOTAL_ENV_SIZE = 1024;
-  
+
       // Statically allocate memory for the environment.
       var poolPtr;
       var envPtr;
@@ -1650,7 +1650,7 @@ function copyTempDouble(ptr) {
         envPtr = HEAP32[((environ)>>2)];
         poolPtr = HEAP32[((envPtr)>>2)];
       }
-  
+
       // Collect key=value lines.
       var strings = [];
       var totalSize = 0;
@@ -1664,7 +1664,7 @@ function copyTempDouble(ptr) {
       if (totalSize > TOTAL_ENV_SIZE) {
         throw new Error('Environment size exceeded TOTAL_ENV_SIZE!');
       }
-  
+
       // Make new.
       var ptrSize = 4;
       for (var i = 0; i < strings.length; i++) {
@@ -1678,15 +1678,15 @@ function copyTempDouble(ptr) {
 
   function ___lock() {}
 
-  
-  
-  
+
+
+
   function ___setErrNo(value) {
       if (Module['___errno_location']) HEAP32[((Module['___errno_location']())>>2)]=value;
       else err('failed to set errno from JS');
       return value;
     }
-  
+
   var PATH={splitPath:function(filename) {
         var splitPathRe = /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
         return splitPathRe.exec(filename).slice(1);
@@ -1804,7 +1804,7 @@ function copyTempDouble(ptr) {
         outputParts = outputParts.concat(toParts.slice(samePartsLength));
         return outputParts.join('/');
       }};
-  
+
   var TTY={ttys:[],init:function () {
         // https://github.com/emscripten-core/emscripten/pull/1555
         // if (ENVIRONMENT_IS_NODE) {
@@ -1885,9 +1885,9 @@ function copyTempDouble(ptr) {
               var BUFSIZE = 256;
               var buf = new Buffer(BUFSIZE);
               var bytesRead = 0;
-  
+
               var isPosixPlatform = (process.platform != 'win32'); // Node doesn't offer a direct check, so test by exclusion
-  
+
               var fd = process.stdin.fd;
               if (isPosixPlatform) {
                 // Linux and Mac cannot use process.stdin.fd (which isn't set up as sync)
@@ -1897,7 +1897,7 @@ function copyTempDouble(ptr) {
                   usingDevice = true;
                 } catch (e) {}
               }
-  
+
               try {
                 bytesRead = fs.readSync(fd, buf, 0, BUFSIZE, null);
               } catch(e) {
@@ -1906,7 +1906,7 @@ function copyTempDouble(ptr) {
                 if (e.toString().indexOf('EOF') != -1) bytesRead = 0;
                 else throw e;
               }
-  
+
               if (usingDevice) { fs.closeSync(fd); }
               if (bytesRead > 0) {
                 result = buf.slice(0, bytesRead).toString('utf-8');
@@ -1959,7 +1959,7 @@ function copyTempDouble(ptr) {
             tty.output = [];
           }
         }}};
-  
+
   var MEMFS={ops_table:null,mount:function(mount) {
         return MEMFS.createNode(null, '/', 16384 | 511 /* 0777 */, 0);
       },createNode:function(parent, name, mode, dev) {
@@ -2028,7 +2028,7 @@ function copyTempDouble(ptr) {
           // When the byte data of the file is populated, this will point to either a typed array, or a normal JS array. Typed arrays are preferred
           // for performance, and used by default. However, typed arrays are not resizable like normal JS arrays are, so there is a small disk size
           // penalty involved for appending file writes that continuously grow a file similar to std::vector capacity vs used -scheme.
-          node.contents = null; 
+          node.contents = null;
         } else if (FS.isLink(node.mode)) {
           node.node_ops = MEMFS.ops_table.link.node;
           node.stream_ops = MEMFS.ops_table.link.stream;
@@ -2196,11 +2196,11 @@ function copyTempDouble(ptr) {
             warnOnce('file packager has copied file data into memory, but in memory growth we are forced to copy it again (see --no-heap-copy)');
           }
           canOwn = false;
-  
+
           if (!length) return 0;
           var node = stream.node;
           node.timestamp = Date.now();
-  
+
           if (buffer.subarray && (!node.contents || node.contents.subarray)) { // This write is from a typed array to a typed array?
             if (canOwn) {
               assert(position === 0, 'canOwn must imply no weird position inside the file');
@@ -2216,7 +2216,7 @@ function copyTempDouble(ptr) {
               return length;
             }
           }
-  
+
           // Appending to an existing file and we need to reallocate, or source data did not come as a typed array.
           MEMFS.expandFileStorage(node, position+length);
           if (node.contents.subarray && buffer.subarray) node.contents.set(buffer.subarray(offset, offset + length), position); // Use typed array write if available.
@@ -2282,12 +2282,12 @@ function copyTempDouble(ptr) {
             // MAP_PRIVATE calls need not to be synced back to underlying fs
             return 0;
           }
-  
+
           var bytesWritten = MEMFS.stream_ops.write(stream, buffer, 0, length, offset, false);
           // should we check if bytesWritten and length are the same?
           return 0;
         }}};
-  
+
   var IDBFS={dbs:{},indexedDB:function() {
         if (typeof indexedDB !== 'undefined') return indexedDB;
         var ret = null;
@@ -2300,13 +2300,13 @@ function copyTempDouble(ptr) {
       },syncfs:function(mount, populate, callback) {
         IDBFS.getLocalSet(mount, function(err, local) {
           if (err) return callback(err);
-  
+
           IDBFS.getRemoteSet(mount, function(err, remote) {
             if (err) return callback(err);
-  
+
             var src = populate ? remote : local;
             var dst = populate ? local : remote;
-  
+
             IDBFS.reconcile(src, dst, callback);
           });
         });
@@ -2316,7 +2316,7 @@ function copyTempDouble(ptr) {
         if (db) {
           return callback(null, db);
         }
-  
+
         var req;
         try {
           req = IDBFS.indexedDB().open(name, IDBFS.DB_VERSION);
@@ -2329,22 +2329,22 @@ function copyTempDouble(ptr) {
         req.onupgradeneeded = function(e) {
           var db = e.target.result;
           var transaction = e.target.transaction;
-  
+
           var fileStore;
-  
+
           if (db.objectStoreNames.contains(IDBFS.DB_STORE_NAME)) {
             fileStore = transaction.objectStore(IDBFS.DB_STORE_NAME);
           } else {
             fileStore = db.createObjectStore(IDBFS.DB_STORE_NAME);
           }
-  
+
           if (!fileStore.indexNames.contains('timestamp')) {
             fileStore.createIndex('timestamp', 'timestamp', { unique: false });
           }
         };
         req.onsuccess = function() {
           db = req.result;
-  
+
           // add to the cache
           IDBFS.dbs[name] = db;
           callback(null, db);
@@ -2355,7 +2355,7 @@ function copyTempDouble(ptr) {
         };
       },getLocalSet:function(mount, callback) {
         var entries = {};
-  
+
         function isRealDir(p) {
           return p !== '.' && p !== '..';
         };
@@ -2364,52 +2364,52 @@ function copyTempDouble(ptr) {
             return PATH.join2(root, p);
           }
         };
-  
+
         var check = FS.readdir(mount.mountpoint).filter(isRealDir).map(toAbsolute(mount.mountpoint));
-  
+
         while (check.length) {
           var path = check.pop();
           var stat;
-  
+
           try {
             stat = FS.stat(path);
           } catch (e) {
             return callback(e);
           }
-  
+
           if (FS.isDir(stat.mode)) {
             check.push.apply(check, FS.readdir(path).filter(isRealDir).map(toAbsolute(path)));
           }
-  
+
           entries[path] = { timestamp: stat.mtime };
         }
-  
+
         return callback(null, { type: 'local', entries: entries });
       },getRemoteSet:function(mount, callback) {
         var entries = {};
-  
+
         IDBFS.getDB(mount.mountpoint, function(err, db) {
           if (err) return callback(err);
-  
+
           try {
             var transaction = db.transaction([IDBFS.DB_STORE_NAME], 'readonly');
             transaction.onerror = function(e) {
               callback(this.error);
               e.preventDefault();
             };
-  
+
             var store = transaction.objectStore(IDBFS.DB_STORE_NAME);
             var index = store.index('timestamp');
-  
+
             index.openKeyCursor().onsuccess = function(event) {
               var cursor = event.target.result;
-  
+
               if (!cursor) {
                 return callback(null, { type: 'remote', db: db, entries: entries });
               }
-  
+
               entries[cursor.primaryKey] = { timestamp: cursor.key };
-  
+
               cursor.continue();
             };
           } catch (e) {
@@ -2418,7 +2418,7 @@ function copyTempDouble(ptr) {
         });
       },loadLocalEntry:function(path, callback) {
         var stat, node;
-  
+
         try {
           var lookup = FS.lookupPath(path);
           node = lookup.node;
@@ -2426,7 +2426,7 @@ function copyTempDouble(ptr) {
         } catch (e) {
           return callback(e);
         }
-  
+
         if (FS.isDir(stat.mode)) {
           return callback(null, { timestamp: stat.mtime, mode: stat.mode });
         } else if (FS.isFile(stat.mode)) {
@@ -2446,19 +2446,19 @@ function copyTempDouble(ptr) {
           } else {
             return callback(new Error('node type not supported'));
           }
-  
+
           FS.chmod(path, entry.mode);
           FS.utime(path, entry.timestamp, entry.timestamp);
         } catch (e) {
           return callback(e);
         }
-  
+
         callback(null);
       },removeLocalEntry:function(path, callback) {
         try {
           var lookup = FS.lookupPath(path);
           var stat = FS.stat(path);
-  
+
           if (FS.isDir(stat.mode)) {
             FS.rmdir(path);
           } else if (FS.isFile(stat.mode)) {
@@ -2467,7 +2467,7 @@ function copyTempDouble(ptr) {
         } catch (e) {
           return callback(e);
         }
-  
+
         callback(null);
       },loadRemoteEntry:function(store, path, callback) {
         var req = store.get(path);
@@ -2492,7 +2492,7 @@ function copyTempDouble(ptr) {
         };
       },reconcile:function(src, dst, callback) {
         var total = 0;
-  
+
         var create = [];
         Object.keys(src.entries).forEach(function (key) {
           var e = src.entries[key];
@@ -2502,7 +2502,7 @@ function copyTempDouble(ptr) {
             total++;
           }
         });
-  
+
         var remove = [];
         Object.keys(dst.entries).forEach(function (key) {
           var e = dst.entries[key];
@@ -2512,17 +2512,17 @@ function copyTempDouble(ptr) {
             total++;
           }
         });
-  
+
         if (!total) {
           return callback(null);
         }
-  
+
         var errored = false;
         var completed = 0;
         var db = src.type === 'remote' ? src.db : dst.db;
         var transaction = db.transaction([IDBFS.DB_STORE_NAME], 'readwrite');
         var store = transaction.objectStore(IDBFS.DB_STORE_NAME);
-  
+
         function done(err) {
           if (err) {
             if (!done.errored) {
@@ -2535,12 +2535,12 @@ function copyTempDouble(ptr) {
             return callback(null);
           }
         };
-  
+
         transaction.onerror = function(e) {
           done(this.error);
           e.preventDefault();
         };
-  
+
         // sort paths in ascending order so directory entries are created
         // before the files inside them
         create.sort().forEach(function (path) {
@@ -2556,7 +2556,7 @@ function copyTempDouble(ptr) {
             });
           }
         });
-  
+
         // sort paths in descending order so files are deleted before their
         // parent directories
         remove.sort().reverse().forEach(function(path) {
@@ -2567,7 +2567,7 @@ function copyTempDouble(ptr) {
           }
         });
       }};
-  
+
   var NODEFS={isWindows:false,staticInit:function() {
         NODEFS.isWindows = !!process.platform.match(/^win/);
         var flags = process["binding"]("constants");
@@ -2636,7 +2636,7 @@ function copyTempDouble(ptr) {
             flags ^= k;
           }
         }
-  
+
         if (!flags) {
           return newFlags;
         } else {
@@ -2810,14 +2810,14 @@ function copyTempDouble(ptr) {
               }
             }
           }
-  
+
           if (position < 0) {
             throw new FS.ErrnoError(ERRNO_CODES.EINVAL);
           }
-  
+
           return position;
         }}};
-  
+
   var WORKERFS={DIR_MODE:16895,FILE_MODE:33279,reader:null,mount:function (mount) {
         assert(ENVIRONMENT_IS_WORKER);
         if (!WORKERFS.reader) WORKERFS.reader = new FileReaderSync();
@@ -2947,24 +2947,24 @@ function copyTempDouble(ptr) {
           }
           return position;
         }}};
-  
+
   var ERRNO_MESSAGES={0:"Success",1:"Not super-user",2:"No such file or directory",3:"No such process",4:"Interrupted system call",5:"I/O error",6:"No such device or address",7:"Arg list too long",8:"Exec format error",9:"Bad file number",10:"No children",11:"No more processes",12:"Not enough core",13:"Permission denied",14:"Bad address",15:"Block device required",16:"Mount device busy",17:"File exists",18:"Cross-device link",19:"No such device",20:"Not a directory",21:"Is a directory",22:"Invalid argument",23:"Too many open files in system",24:"Too many open files",25:"Not a typewriter",26:"Text file busy",27:"File too large",28:"No space left on device",29:"Illegal seek",30:"Read only file system",31:"Too many links",32:"Broken pipe",33:"Math arg out of domain of func",34:"Math result not representable",35:"File locking deadlock error",36:"File or path name too long",37:"No record locks available",38:"Function not implemented",39:"Directory not empty",40:"Too many symbolic links",42:"No message of desired type",43:"Identifier removed",44:"Channel number out of range",45:"Level 2 not synchronized",46:"Level 3 halted",47:"Level 3 reset",48:"Link number out of range",49:"Protocol driver not attached",50:"No CSI structure available",51:"Level 2 halted",52:"Invalid exchange",53:"Invalid request descriptor",54:"Exchange full",55:"No anode",56:"Invalid request code",57:"Invalid slot",59:"Bad font file fmt",60:"Device not a stream",61:"No data (for no delay io)",62:"Timer expired",63:"Out of streams resources",64:"Machine is not on the network",65:"Package not installed",66:"The object is remote",67:"The link has been severed",68:"Advertise error",69:"Srmount error",70:"Communication error on send",71:"Protocol error",72:"Multihop attempted",73:"Cross mount point (not really error)",74:"Trying to read unreadable message",75:"Value too large for defined data type",76:"Given log. name not unique",77:"f.d. invalid for this operation",78:"Remote address changed",79:"Can   access a needed shared lib",80:"Accessing a corrupted shared lib",81:".lib section in a.out corrupted",82:"Attempting to link in too many libs",83:"Attempting to exec a shared library",84:"Illegal byte sequence",86:"Streams pipe error",87:"Too many users",88:"Socket operation on non-socket",89:"Destination address required",90:"Message too long",91:"Protocol wrong type for socket",92:"Protocol not available",93:"Unknown protocol",94:"Socket type not supported",95:"Not supported",96:"Protocol family not supported",97:"Address family not supported by protocol family",98:"Address already in use",99:"Address not available",100:"Network interface is not configured",101:"Network is unreachable",102:"Connection reset by network",103:"Connection aborted",104:"Connection reset by peer",105:"No buffer space available",106:"Socket is already connected",107:"Socket is not connected",108:"Can't send after socket shutdown",109:"Too many references",110:"Connection timed out",111:"Connection refused",112:"Host is down",113:"Host is unreachable",114:"Socket already connected",115:"Connection already in progress",116:"Stale file handle",122:"Quota exceeded",123:"No medium (in tape drive)",125:"Operation canceled",130:"Previous owner died",131:"State not recoverable"};
-  
+
   var ERRNO_CODES={EPERM:1,ENOENT:2,ESRCH:3,EINTR:4,EIO:5,ENXIO:6,E2BIG:7,ENOEXEC:8,EBADF:9,ECHILD:10,EAGAIN:11,EWOULDBLOCK:11,ENOMEM:12,EACCES:13,EFAULT:14,ENOTBLK:15,EBUSY:16,EEXIST:17,EXDEV:18,ENODEV:19,ENOTDIR:20,EISDIR:21,EINVAL:22,ENFILE:23,EMFILE:24,ENOTTY:25,ETXTBSY:26,EFBIG:27,ENOSPC:28,ESPIPE:29,EROFS:30,EMLINK:31,EPIPE:32,EDOM:33,ERANGE:34,ENOMSG:42,EIDRM:43,ECHRNG:44,EL2NSYNC:45,EL3HLT:46,EL3RST:47,ELNRNG:48,EUNATCH:49,ENOCSI:50,EL2HLT:51,EDEADLK:35,ENOLCK:37,EBADE:52,EBADR:53,EXFULL:54,ENOANO:55,EBADRQC:56,EBADSLT:57,EDEADLOCK:35,EBFONT:59,ENOSTR:60,ENODATA:61,ETIME:62,ENOSR:63,ENONET:64,ENOPKG:65,EREMOTE:66,ENOLINK:67,EADV:68,ESRMNT:69,ECOMM:70,EPROTO:71,EMULTIHOP:72,EDOTDOT:73,EBADMSG:74,ENOTUNIQ:76,EBADFD:77,EREMCHG:78,ELIBACC:79,ELIBBAD:80,ELIBSCN:81,ELIBMAX:82,ELIBEXEC:83,ENOSYS:38,ENOTEMPTY:39,ENAMETOOLONG:36,ELOOP:40,EOPNOTSUPP:95,EPFNOSUPPORT:96,ECONNRESET:104,ENOBUFS:105,EAFNOSUPPORT:97,EPROTOTYPE:91,ENOTSOCK:88,ENOPROTOOPT:92,ESHUTDOWN:108,ECONNREFUSED:111,EADDRINUSE:98,ECONNABORTED:103,ENETUNREACH:101,ENETDOWN:100,ETIMEDOUT:110,EHOSTDOWN:112,EHOSTUNREACH:113,EINPROGRESS:115,EALREADY:114,EDESTADDRREQ:89,EMSGSIZE:90,EPROTONOSUPPORT:93,ESOCKTNOSUPPORT:94,EADDRNOTAVAIL:99,ENETRESET:102,EISCONN:106,ENOTCONN:107,ETOOMANYREFS:109,EUSERS:87,EDQUOT:122,ESTALE:116,ENOTSUP:95,ENOMEDIUM:123,EILSEQ:84,EOVERFLOW:75,ECANCELED:125,ENOTRECOVERABLE:131,EOWNERDEAD:130,ESTRPIPE:86};
-  
+
   var _stdin=8439584;
-  
+
   var _stdout=8439600;
-  
+
   var _stderr=8439616;var FS={root:null,mounts:[],devices:{},streams:[],nextInode:1,nameTable:null,currentPath:"/",initialized:false,ignorePermissions:true,trackingDelegate:{},tracking:{openFlags:{READ:1,WRITE:2}},ErrnoError:null,genericErrors:{},filesystems:null,syncFSRequests:0,handleFSError:function(e) {
         if (!(e instanceof FS.ErrnoError)) throw e + ' : ' + stackTrace();
         return ___setErrNo(e.errno);
       },lookupPath:function(path, opts) {
         path = PATH.resolve(FS.cwd(), path);
         opts = opts || {};
-  
+
         if (!path) return { path: '', node: null };
-  
+
         var defaults = {
           follow_mount: true,
           recurse_count: 0
@@ -2974,37 +2974,37 @@ function copyTempDouble(ptr) {
             opts[key] = defaults[key];
           }
         }
-  
+
         if (opts.recurse_count > 8) {  // max recursive lookup of 8
           throw new FS.ErrnoError(40);
         }
-  
+
         // split the path
         var parts = PATH.normalizeArray(path.split('/').filter(function(p) {
           return !!p;
         }), false);
-  
+
         // start at the root
         var current = FS.root;
         var current_path = '/';
-  
+
         for (var i = 0; i < parts.length; i++) {
           var islast = (i === parts.length-1);
           if (islast && opts.parent) {
             // stop resolving
             break;
           }
-  
+
           current = FS.lookupNode(current, parts[i]);
           current_path = PATH.join2(current_path, parts[i]);
-  
+
           // jump to the mount's root node if this is a mountpoint
           if (FS.isMountpoint(current)) {
             if (!islast || (islast && opts.follow_mount)) {
               current = current.mounted.root;
             }
           }
-  
+
           // by default, lookupPath will not follow a symlink if it is the final path component.
           // setting opts.follow = true will override this behavior.
           if (!islast || opts.follow) {
@@ -3012,17 +3012,17 @@ function copyTempDouble(ptr) {
             while (FS.isLink(current.mode)) {
               var link = FS.readlink(current_path);
               current_path = PATH.resolve(PATH.dirname(current_path), link);
-  
+
               var lookup = FS.lookupPath(current_path, { recurse_count: opts.recurse_count });
               current = lookup.node;
-  
+
               if (count++ > 40) {  // limit max consecutive symlinks to 40 (SYMLOOP_MAX).
                 throw new FS.ErrnoError(40);
               }
             }
           }
         }
-  
+
         return { path: current_path, node: current };
       },getPath:function(node) {
         var path;
@@ -3037,8 +3037,8 @@ function copyTempDouble(ptr) {
         }
       },hashName:function(parentid, name) {
         var hash = 0;
-  
-  
+
+
         for (var i = 0; i < name.length; i++) {
           hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
         }
@@ -3091,13 +3091,13 @@ function copyTempDouble(ptr) {
             this.stream_ops = {};
             this.rdev = rdev;
           };
-  
+
           FS.FSNode.prototype = {};
-  
+
           // compatibility
           var readMode = 292 | 73;
           var writeMode = 146;
-  
+
           // NOTE we must use Object.defineProperties instead of individual calls to
           // Object.defineProperty in order to make closure compiler happy
           Object.defineProperties(FS.FSNode.prototype, {
@@ -3117,11 +3117,11 @@ function copyTempDouble(ptr) {
             }
           });
         }
-  
+
         var node = new FS.FSNode(parent, name, mode, rdev);
-  
+
         FS.hashAddNode(node);
-  
+
         return node;
       },destroyNode:function(node) {
         FS.hashRemoveNode(node);
@@ -3284,37 +3284,37 @@ function copyTempDouble(ptr) {
       },getMounts:function(mount) {
         var mounts = [];
         var check = [mount];
-  
+
         while (check.length) {
           var m = check.pop();
-  
+
           mounts.push(m);
-  
+
           check.push.apply(check, m.mounts);
         }
-  
+
         return mounts;
       },syncfs:function(populate, callback) {
         if (typeof(populate) === 'function') {
           callback = populate;
           populate = false;
         }
-  
+
         FS.syncFSRequests++;
-  
+
         if (FS.syncFSRequests > 1) {
           console.log('warning: ' + FS.syncFSRequests + ' FS.syncfs operations in flight at once, probably just doing extra work');
         }
-  
+
         var mounts = FS.getMounts(FS.root.mount);
         var completed = 0;
-  
+
         function doCallback(err) {
           assert(FS.syncFSRequests > 0);
           FS.syncFSRequests--;
           return callback(err);
         }
-  
+
         function done(err) {
           if (err) {
             if (!done.errored) {
@@ -3327,7 +3327,7 @@ function copyTempDouble(ptr) {
             doCallback(null);
           }
         };
-  
+
         // sync all mounts
         mounts.forEach(function (mount) {
           if (!mount.type.syncfs) {
@@ -3339,78 +3339,78 @@ function copyTempDouble(ptr) {
         var root = mountpoint === '/';
         var pseudo = !mountpoint;
         var node;
-  
+
         if (root && FS.root) {
           throw new FS.ErrnoError(16);
         } else if (!root && !pseudo) {
           var lookup = FS.lookupPath(mountpoint, { follow_mount: false });
-  
+
           mountpoint = lookup.path;  // use the absolute path
           node = lookup.node;
-  
+
           if (FS.isMountpoint(node)) {
             throw new FS.ErrnoError(16);
           }
-  
+
           if (!FS.isDir(node.mode)) {
             throw new FS.ErrnoError(20);
           }
         }
-  
+
         var mount = {
           type: type,
           opts: opts,
           mountpoint: mountpoint,
           mounts: []
         };
-  
+
         // create a root node for the fs
         var mountRoot = type.mount(mount);
         mountRoot.mount = mount;
         mount.root = mountRoot;
-  
+
         if (root) {
           FS.root = mountRoot;
         } else if (node) {
           // set as a mountpoint
           node.mounted = mount;
-  
+
           // add the new mount to the current mount's children
           if (node.mount) {
             node.mount.mounts.push(mount);
           }
         }
-  
+
         return mountRoot;
       },unmount:function (mountpoint) {
         var lookup = FS.lookupPath(mountpoint, { follow_mount: false });
-  
+
         if (!FS.isMountpoint(lookup.node)) {
           throw new FS.ErrnoError(22);
         }
-  
+
         // destroy the nodes for this mount, and all its child mounts
         var node = lookup.node;
         var mount = node.mounted;
         var mounts = FS.getMounts(mount);
-  
+
         Object.keys(FS.nameTable).forEach(function (hash) {
           var current = FS.nameTable[hash];
-  
+
           while (current) {
             var next = current.name_next;
-  
+
             if (mounts.indexOf(current.mount) !== -1) {
               FS.destroyNode(current);
             }
-  
+
             current = next;
           }
         });
-  
+
         // no longer a mountpoint
         node.mounted = null;
-  
+
         // remove this mount from the child mounts
         var idx = node.mount.mounts.indexOf(mount);
         assert(idx !== -1);
@@ -3817,7 +3817,7 @@ function copyTempDouble(ptr) {
         }
         // we've already handled these, don't pass down to the underlying vfs
         flags &= ~(128 | 512);
-  
+
         // register the stream with the filesystem
         var stream = FS.createStream({
           node: node,
@@ -4109,7 +4109,7 @@ function copyTempDouble(ptr) {
         // TODO deprecate the old functionality of a single
         // input / output callback and that utilizes FS.createDevice
         // and instead require a unique set of stream ops
-  
+
         // by default, we symlink the standard streams to the
         // default tty devices. however, if the standard streams
         // have been overwritten we create a unique device for
@@ -4129,7 +4129,7 @@ function copyTempDouble(ptr) {
         } else {
           FS.symlink('/dev/tty1', '/dev/stderr');
         }
-  
+
         // open default streams for the stdin, stdout and stderr devices
         var stdin = FS.open('/dev/stdin', 'r');
         var stdout = FS.open('/dev/stdout', 'w');
@@ -4165,15 +4165,15 @@ function copyTempDouble(ptr) {
         });
       },staticInit:function() {
         FS.ensureErrnoError();
-  
+
         FS.nameTable = new Array(4096);
-  
+
         FS.mount(MEMFS, {}, '/');
-  
+
         FS.createDefaultDirectories();
         FS.createDefaultDevices();
         FS.createSpecialDirectories();
-  
+
         FS.filesystems = {
           'MEMFS': MEMFS,
           'IDBFS': IDBFS,
@@ -4183,14 +4183,14 @@ function copyTempDouble(ptr) {
       },init:function(input, output, error) {
         assert(!FS.init.initialized, 'FS.init was previously called. If you want to initialize later with custom parameters, remove any earlier calls (note that one is automatically added to the generated code)');
         FS.init.initialized = true;
-  
+
         FS.ensureErrnoError();
-  
+
         // Allow Module.stdin etc. to provide defaults, if none explicitly passed to us here
         Module['stdin'] = input || Module['stdin'];
         Module['stdout'] = output || Module['stdout'];
         Module['stderr'] = error || Module['stderr'];
-  
+
         FS.createStandardStreams();
       },quit:function() {
         FS.init.initialized = false;
@@ -4397,27 +4397,27 @@ function copyTempDouble(ptr) {
           var header;
           var hasByteServing = (header = xhr.getResponseHeader("Accept-Ranges")) && header === "bytes";
           var usesGzip = (header = xhr.getResponseHeader("Content-Encoding")) && header === "gzip";
-  
+
           var chunkSize = 1024*1024; // Chunk size in bytes
-  
+
           if (!hasByteServing) chunkSize = datalength;
-  
+
           // Function to get a range from the remote URL.
           var doXHR = (function(from, to) {
             if (from > to) throw new Error("invalid range (" + from + ", " + to + ") or no bytes requested!");
             if (to > datalength-1) throw new Error("only " + datalength + " bytes available! programmer error!");
-  
+
             // TODO: Use mozResponseArrayBuffer, responseStream, etc. if available.
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, false);
             if (datalength !== chunkSize) xhr.setRequestHeader("Range", "bytes=" + from + "-" + to);
-  
+
             // Some hints to the browser that we want binary data.
             if (typeof Uint8Array != 'undefined') xhr.responseType = 'arraybuffer';
             if (xhr.overrideMimeType) {
               xhr.overrideMimeType('text/plain; charset=x-user-defined');
             }
-  
+
             xhr.send(null);
             if (!(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304)) throw new Error("Couldn't load " + url + ". Status: " + xhr.status);
             if (xhr.response !== undefined) {
@@ -4437,7 +4437,7 @@ function copyTempDouble(ptr) {
             if (typeof(lazyArray.chunks[chunkNum]) === "undefined") throw new Error("doXHR failed!");
             return lazyArray.chunks[chunkNum];
           });
-  
+
           if (usesGzip || !datalength) {
             // if the server uses gzip or doesn't supply the length, we have to download the whole file to get the (uncompressed) length
             chunkSize = datalength = 1; // this will force getter(0)/doXHR do download the whole file
@@ -4445,7 +4445,7 @@ function copyTempDouble(ptr) {
             chunkSize = datalength;
             console.log("LazyFiles on gzip forces download of the whole file when length is accessed");
           }
-  
+
           this._length = datalength;
           this._chunkSize = chunkSize;
           this.lengthKnown = true;
@@ -4471,12 +4471,12 @@ function copyTempDouble(ptr) {
               }
             }
           });
-  
+
           var properties = { isDevice: false, contents: lazyArray };
         } else {
           var properties = { isDevice: false, url: url };
         }
-  
+
         var node = FS.createFile(parent, name, properties, canRead, canWrite);
         // This is a total hack, but I want to get this lazy file code out of the
         // core of MEMFS. If we want to keep this lazy file concept I feel it should
@@ -4706,14 +4706,14 @@ function copyTempDouble(ptr) {
       },doReadlink:function(path, buf, bufsize) {
         if (bufsize <= 0) return -ERRNO_CODES.EINVAL;
         var ret = FS.readlink(path);
-  
+
         var len = Math.min(bufsize, lengthBytesUTF8(ret));
         var endChar = HEAP8[buf+len];
         stringToUTF8(ret, buf, bufsize+1);
         // readlink is one of the rare functions that write out a C string, but does never append a null to the output buffer(!)
         // stringToUTF8() always appends a null byte, so restore the character under the null byte after the write.
         HEAP8[buf+len] = endChar;
-  
+
         return len;
       },doAccess:function(path, amode) {
         if (amode & ~7) {
@@ -4849,7 +4849,7 @@ function copyTempDouble(ptr) {
         }
         case 12:
         /* case 12: Currently in musl F_GETLK64 has same value as F_GETLK, so omitted to avoid duplicate case blocks. If that changes, uncomment this */ {
-          
+
           var arg = SYSCALLS.get();
           var offset = 0;
           // We're always unlocked.
@@ -4860,8 +4860,8 @@ function copyTempDouble(ptr) {
         case 14:
         /* case 13: Currently in musl F_SETLK64 has same value as F_SETLK, so omitted to avoid duplicate case blocks. If that changes, uncomment this */
         /* case 14: Currently in musl F_SETLKW64 has same value as F_SETLKW, so omitted to avoid duplicate case blocks. If that changes, uncomment this */
-          
-          
+
+
           return 0; // Pretend that the locking is successful.
         case 16:
         case 8:
@@ -4968,11 +4968,11 @@ function copyTempDouble(ptr) {
       return TOTAL_MEMORY;
     }
 
-  
+
   function abortOnCannotGrowMemory(requestedSize) {
       abort('Cannot enlarge memory arrays to size ' + requestedSize + ' bytes (OOM). Either (1) compile with  -s TOTAL_MEMORY=X  with X higher than the current value ' + TOTAL_MEMORY + ', (2) compile with  -s ALLOW_MEMORY_GROWTH=1  which allows increasing the size at runtime, or (3) if you want malloc to return NULL (0) instead of this abort, compile with  -s ABORTING_MALLOC=0 ');
     }
-  
+
   function emscripten_realloc_buffer(size) {
       var PAGE_MULTIPLE = 65536;
       size = alignUp(size, PAGE_MULTIPLE); // round up to wasm page size
@@ -4995,19 +4995,19 @@ function copyTempDouble(ptr) {
       var oldSize = _emscripten_get_heap_size();
       // TOTAL_MEMORY is the current size of the actual array, and DYNAMICTOP is the new top.
       assert(requestedSize > oldSize); // This function should only ever be called after the ceiling of the dynamic heap has already been bumped to exceed the current total size of the asm.js heap.
-  
-  
+
+
       var PAGE_MULTIPLE = 65536;
       var LIMIT = 2147483648 - PAGE_MULTIPLE; // We can do one page short of 2GB as theoretical maximum.
-  
+
       if (requestedSize > LIMIT) {
         err('Cannot enlarge memory, asked to go up to ' + requestedSize + ' bytes, but the limit is ' + LIMIT + ' bytes!');
         return false;
       }
-  
+
       var MIN_TOTAL_MEMORY = 16777216;
       var newSize = Math.max(oldSize, MIN_TOTAL_MEMORY); // So the loop below will not be infinite, and minimum asm.js memory size is 16MB.
-  
+
       while (newSize < requestedSize) { // Keep incrementing the heap size as long as it's less than what is requested.
         if (newSize <= 536870912) {
           newSize = alignUp(2 * newSize, PAGE_MULTIPLE); // Simple heuristic: double until 1GB...
@@ -5019,10 +5019,10 @@ function copyTempDouble(ptr) {
           }
         }
       }
-  
-  
+
+
       var start = Date.now();
-  
+
       var replacement = emscripten_realloc_buffer(newSize);
       if (!replacement || replacement.byteLength != newSize) {
         err('Failed to grow the heap from ' + oldSize + ' bytes to ' + newSize + ' bytes, not enough memory!');
@@ -5031,16 +5031,16 @@ function copyTempDouble(ptr) {
         }
         return false;
       }
-  
+
       // everything worked
       updateGlobalBuffer(replacement);
       updateGlobalBufferViews();
-  
+
       TOTAL_MEMORY = newSize;
       HEAPU32[DYNAMICTOP_PTR>>2] = requestedSize;
-  
-  
-  
+
+
+
       return true;
     }
 
@@ -5057,30 +5057,30 @@ function copyTempDouble(ptr) {
       return 0;
     }
 
-   
 
-  
+
+
   var ___tm_current=8439664;
-  
-  
+
+
   var ___tm_timezone=(stringToUTF8("GMT", 8439712, 4), 8439712);
-  
+
   function _tzset() {
       // TODO: Use (malleable) environment variables instead of system settings.
       if (_tzset.called) return;
       _tzset.called = true;
-  
+
       // timezone is specified as seconds west of UTC ("The external variable
       // `timezone` shall be set to the difference, in seconds, between
       // Coordinated Universal Time (UTC) and local standard time."), the same
       // as returned by getTimezoneOffset().
       // See http://pubs.opengroup.org/onlinepubs/009695399/functions/tzset.html
       HEAP32[((__get_timezone())>>2)]=(new Date()).getTimezoneOffset() * 60;
-  
+
       var winter = new Date(2000, 0, 1);
       var summer = new Date(2000, 6, 1);
       HEAP32[((__get_daylight())>>2)]=Number(winter.getTimezoneOffset() != summer.getTimezoneOffset());
-  
+
       function extractZone(date) {
         var match = date.toTimeString().match(/\(([A-Za-z ]+)\)$/);
         return match ? match[1] : "GMT";
@@ -5107,38 +5107,38 @@ function copyTempDouble(ptr) {
       HEAP32[(((tmPtr)+(16))>>2)]=date.getMonth();
       HEAP32[(((tmPtr)+(20))>>2)]=date.getFullYear()-1900;
       HEAP32[(((tmPtr)+(24))>>2)]=date.getDay();
-  
+
       var start = new Date(date.getFullYear(), 0, 1);
       var yday = ((date.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))|0;
       HEAP32[(((tmPtr)+(28))>>2)]=yday;
       HEAP32[(((tmPtr)+(36))>>2)]=-(date.getTimezoneOffset() * 60);
-  
+
       // Attention: DST is in December in South, and some regions don't have DST at all.
       var summerOffset = new Date(2000, 6, 1).getTimezoneOffset();
       var winterOffset = start.getTimezoneOffset();
       var dst = (summerOffset != winterOffset && date.getTimezoneOffset() == Math.min(winterOffset, summerOffset))|0;
       HEAP32[(((tmPtr)+(32))>>2)]=dst;
-  
+
       var zonePtr = HEAP32[(((__get_tzname())+(dst ? 4 : 0))>>2)];
       HEAP32[(((tmPtr)+(40))>>2)]=zonePtr;
-  
+
       return tmPtr;
     }function _localtime(time) {
       return _localtime_r(time, ___tm_current);
     }
 
-  
+
   function _emscripten_memcpy_big(dest, src, num) {
       HEAPU8.set(HEAPU8.subarray(src, src+num), dest);
     }
-  
+
   var _Int8Array=undefined;
-  
-  var _Int32Array=undefined; 
 
-   
+  var _Int32Array=undefined;
 
-   
+
+
+
 
   function _sysconf(name) {
       // long sysconf(int name);
@@ -5774,4 +5774,4 @@ run();
 // {{MODULE_ADDITIONS}}
 
 
-
+};

@@ -1,3 +1,6 @@
+let main = require("./gnugo.js");
+
+exports.load = function(wasmURL, callback) {
 var Module = {};
 var ASSERTIONS = 1;
 /**
@@ -162,8 +165,8 @@ wasmXHR.onload = function () {
     }
   }
 
-  var script = document.createElement("script");
-  script.src = "gnugo.js";
-  document.body.appendChild(script);
+  main.init(Module);
+  callback(Module)()
 };
 wasmXHR.send(null);
+}
