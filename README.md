@@ -50,6 +50,33 @@ emcc -s BINARYEN_ASYNC_COMPILATION=0 \
 '(;GM[1]FF[4]\nSZ[10]\nDT[2020-11-08]\nAP[GNU Go:3.9.1]\n;B[fe]C[load and analyze mode])\n'
 ```
 
+## Patch javascript interface to work synchronously
+
+Edit the `gnugo.js` file:
+
+- Replace `var Module = typeof Module !== 'undefined' ? Module : {};` with `exports.init = function(Module) {`
+- Add a `}` at the end
+
+## Build test interface
+
+```
+parcel serve javascript/index.html
+parcel build javascript/index.html
+```
+
 ## Test with browser
 
 Visit [demo](https://tristancacqueray.github.io/wasm-gnugo/)
+
+## Update pages
+
+```
+rm -Rf dist/ && \
+    parcel build javascript/index.html --public-url /wasm-gnugo/ && \
+    git checkout pages && \
+    rsync -a dist/ $(pwd)/ && \
+    git add -A && \
+    git commit -m "Updates" && \
+    git push origin pages && \
+    git checkout master
+```
