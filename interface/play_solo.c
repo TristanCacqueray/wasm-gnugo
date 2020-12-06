@@ -183,7 +183,7 @@ load_and_analyze_sgf_file(Gameinfo *gameinfo)
 #define FINISH    1
 #define AFTERMATH 2
 
-void 
+float 
 load_and_score_sgf_file(SGFTree *tree, Gameinfo *gameinfo, 
 			const char *scoringmode)
 {
@@ -259,6 +259,8 @@ load_and_score_sgf_file(SGFTree *tree, Gameinfo *gameinfo,
     score = aftermath_compute_score(next, score_tree);
   else
     score = gnugo_estimate_score(NULL, NULL);
+
+  return score;
   
   if (score < 0.0) {
     sprintf(text, "Black wins by %1.1f points\n", -score);

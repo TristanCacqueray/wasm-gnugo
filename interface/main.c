@@ -869,3 +869,31 @@ char *play(int seed, char *board)
   load_and_analyze_sgf_file(&gameinfo);
   return get_sgf_content();
 }
+
+float score(int seed, char *board)
+{
+  Gameinfo gameinfo;
+  SGFTree sgftree;
+
+  sgftree_clear(&sgftree);
+  gameinfo_clear(&gameinfo);
+
+  init_gnugo(DEFAULT_MEMORY, seed);
+
+  // We cheat fileread by providing the raw file content
+  setsgffile(board);
+  if (!sgftree_readfile(&sgftree, "-")) {
+    fprintf(stderr, "Cannot open or parse '%s'\n", board);
+    return 0.0;
+  }
+
+  if (gameinfo_play_sgftree_rot(&gameinfo, &sgftree, NULL, 0) == EMPTY) {
+    fprintf(stderr, "Cannot load '%s'\n", board);
+    return 0.0;
+  }
+
+  gameinfo.game_record = sgftree;
+  outfilename[0] = '*';
+  set_in_memory_content();
+  return load_and_score_sgf_file(&sgftree, &gameinfo, "");
+}

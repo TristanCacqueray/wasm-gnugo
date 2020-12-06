@@ -38,7 +38,7 @@ INPUTS="build/wasm/interface/*.o build/wasm/engine/libengine.a build/wasm/patter
 emcc -s BINARYEN_ASYNC_COMPILATION=0 \
      -s ALLOW_MEMORY_GROWTH=1        \
      -s EXPORTED_RUNTIME_METHODS='["ccall"]' \
-     -s EXPORTED_FUNCTIONS="['_get_version', '_play']" \
+     -s EXPORTED_FUNCTIONS="['_get_version', '_play', '_score']" \
      -o gnugo.js $INPUTS
 ```
 

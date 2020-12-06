@@ -41,7 +41,7 @@ void play_solo(Gameinfo *gameinfo, int benchmark);
 void play_replay(SGFTree *tree, int color_to_test);
 
 void load_and_analyze_sgf_file(Gameinfo *gameinfo);
-void load_and_score_sgf_file(SGFTree *tree, Gameinfo *gameinfo,
+float load_and_score_sgf_file(SGFTree *tree, Gameinfo *gameinfo,
 			     const char *scoringmode);
 
 
