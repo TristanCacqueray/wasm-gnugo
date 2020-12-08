@@ -17,7 +17,7 @@ stamp-h
 stamp-h1
 autom4te.cache
 
-build
-
+/build
+/gnugo.wasm
 /gnugo.js
 /dist

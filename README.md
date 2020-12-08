@@ -52,15 +52,14 @@ emcc -s BINARYEN_ASYNC_COMPILATION=0 \
 
 ## Patch javascript interface to work synchronously
 
-Edit the `gnugo.js` file:
-
-- Replace `var Module = typeof Module !== 'undefined' ? Module : {};` with `exports.init = function(Module) {`
-- Add a `}` at the end
+- Copy the `gnugo.js` file to the javascript folder
+- Keep the relevant diff
 
 ## Build test interface
 
 ```
 parcel serve javascript/index.html
+# copy gnugo.wasm to the dist folder
 parcel build javascript/index.html
 ```
 
@@ -73,6 +72,7 @@ Visit [demo](https://tristancacqueray.github.io/wasm-gnugo/)
 ```
 rm -Rf dist/ && \
     parcel build javascript/index.html --public-url /wasm-gnugo/ && \
+    cp javascript/gnugo.js . && \
     git checkout pages && \
     rsync -a dist/ $(pwd)/ && \
     git add -A && \
