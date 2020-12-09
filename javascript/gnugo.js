@@ -5427,7 +5427,10 @@ var env = asmLibraryArg;
   var module;
 
   console.log("Instantiating wasm...")
-  WebAssembly.instantiateStreaming(fetch(wasmURL), info).then(result => {
+  fetch(wasmURL)
+  .then(response => response.arrayBuffer())
+  .then(bytes => WebAssembly.instantiate(bytes, info))
+  .then(result => {
       //console.log("Instantiated!", result)
       Module['asm'] = result.instance.exports;
       removeRunDependency('wasm-instantiate');
