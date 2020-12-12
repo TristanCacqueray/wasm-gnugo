@@ -1,5 +1,5 @@
 // A modified javascript binding loader to work asynchronously and using WebAssembly.instantiate to support chrome
-exports.withWasm = function(wasmURL, callback) {
+exports.get = function(wasmURL) {
 
 // Copyright 2010 The Emscripten Authors.  All rights reserved.
 // Emscripten is available under two separate licenses, the MIT license and the
@@ -5427,7 +5427,7 @@ var env = asmLibraryArg;
   var module;
 
   console.log("Instantiating wasm...")
-  fetch(wasmURL)
+  return fetch(wasmURL)
   .then(response => response.arrayBuffer())
   .then(bytes => WebAssembly.instantiate(bytes, info))
   .then(result => {
@@ -5850,5 +5850,5 @@ run();
 // {{MODULE_ADDITIONS}}
 
 
-// Finally we jump into the callback with the loaded Module
-callback(Module)();})}
+// Finally we return the promised module
+return Promise.resolve(Module);})}

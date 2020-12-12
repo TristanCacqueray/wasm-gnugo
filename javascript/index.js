@@ -1,5 +1,5 @@
 let loader = require("./gnugo.js");
-loader.withWasm("./gnugo.wasm", (Module) => () => {
+loader.get("./gnugo.wasm").then(Module => {
   document.querySelector("#gnugoOutput").innerHTML = "Ready to play!";
   document.querySelector("#playButton").addEventListener("click", function () {
     let input = document.querySelector("#textInput").value;
