@@ -96,8 +96,8 @@ if (ENVIRONMENT_IS_NODE) {
 
   Module['read'] = function shell_read(filename, binary) {
     var ret;
-      if (!nodeFS) nodeFS = require('fs');
-      if (!nodePath) nodePath = require('path');
+      // if (!nodeFS) nodeFS = require('fs');
+      // if (!nodePath) nodePath = require('path');
       filename = nodePath['normalize'](filename);
       ret = nodeFS['readFileSync'](filename);
     return binary ? ret : ret.toString();
@@ -5325,7 +5325,7 @@ function copyTempDouble(ptr) {
       return 0;
     }
 FS.staticInit();;
-if (ENVIRONMENT_IS_NODE) { var fs = require("fs"); var NODEJS_PATH = require("path"); NODEFS.staticInit(); };
+// if (ENVIRONMENT_IS_NODE) { var fs = require("fs"); var NODEJS_PATH = require("path"); NODEFS.staticInit(); };
 var ASSERTIONS = true;
 
 // Copyright 2017 The Emscripten Authors.  All rights reserved.
